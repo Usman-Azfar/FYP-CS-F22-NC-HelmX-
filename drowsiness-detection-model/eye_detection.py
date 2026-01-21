@@ -5,6 +5,7 @@ import tensorflow as tf
 from keras import models
 import os
 import time
+import winsound
 
 # Initialize MediaPipe Face Mesh
 mp_face_mesh = mp.solutions.face_mesh
@@ -21,11 +22,13 @@ RIGHT_EYE_INDICES = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 15
 
 # Configuration
 EYE_MODEL_PATH = 'eye_state_model.h5'
+ALARM_FILE = 'alarm.wav'
 EYE_IMG_SIZE = (64, 64)
 EYE_STATE_THRESHOLD = 0.5
 EAR_THRESHOLD = 0.15
 CLOSED_FRAMES_THRESHOLD_SECONDS = 0.5
 PREDICTION_HISTORY_SIZE = 5
+ALARM_COOLDOWN_SECONDS = 2.0  # Minimum time between alarm plays
 
 def enhance_eye_image(eye_img):
     """Enhance eye image for better detection"""
@@ -88,6 +91,16 @@ def load_model():
         return tf.keras.models.load_model(EYE_MODEL_PATH)
     return None
 
+def play_alarm():
+    """Play the alarm sound file"""
+    if os.path.exists(ALARM_FILE):
+        try:
+            winsound.PlaySound(ALARM_FILE, winsound.SND_FILENAME | winsound.SND_ASYNC)
+        except Exception as e:
+            print(f"Error playing alarm: {e}")
+    else:
+        print(f"Warning: Alarm file '{ALARM_FILE}' not found")
+
 def main():
     """Main function for eye detection"""
     eye_model = load_model()
@@ -107,6 +120,7 @@ def main():
     prediction_history = []
     closed_frames_counter = 0
     eye_closed_start_time = 0
+    last_alarm_time = 0
 
     while cap.isOpened():
         success, frame = cap.read()
@@ -171,6 +185,10 @@ def main():
             closed_frames_counter += 1
             if closed_frames_counter >= closed_frames_threshold:
                 cv2.putText(frame, "ALERT: EYES CLOSED", (10, frame.shape[0] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+                # Play alarm if cooldown has passed
+                if current_time - last_alarm_time >= ALARM_COOLDOWN_SECONDS:
+                    play_alarm()
+                    last_alarm_time = current_time
         else:
             closed_frames_counter = 0
 
