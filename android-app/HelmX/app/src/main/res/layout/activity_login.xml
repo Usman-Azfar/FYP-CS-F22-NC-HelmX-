@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: activity_login.xml
+    Purpose: Layout definition for user login screen with email/password authentication.
+            Includes form inputs, validation, and navigation to sign-up screen.
+    Author: Awais Imtiaz
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -244,14 +250,12 @@
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Tags Descriptions -->
-    <!--android:fillViewport="true" => If content is smaller than ScrollView, it stretches to fill the entire ScrollView area-->
-    <!--android:scrollbars="none" =>  Hides the scrollbar indicators that normally appear when scrolling-->
-    <!--android:scaleType="fitCenter" => scales the image uniformly, maintaining its original aspect ratio, until it fits entirely within the ImageView, and then centers it. -->
-    <!--app:layout_constraintWidth_percent="0.35" => sets the width of the view to 35% of its parent's width, Only works within ConstraintLayout, Value should be between 0 and 1 (0.35 = 35%)-->
-    <!--android:textAllCaps="false" => makes the text not all caps, as all caps text is default behaviour of material button-->
-    <!--android:lineSpacingExtra="4dp" => Adds vertical spacing between lines-->
-    <!--app:hintEnabled="false" => By default, TextInputLayout shows a hint that appears normal when no text, but floats above when text is entered. This tag disables floating animation and makes hint static-->
+    <!--
+        Complex layout attributes explanation:
+        - android:fillViewport="true": Stretches content to fill ScrollView when content is smaller
+        - app:layout_constraintWidth_percent: Sets width as percentage of parent (ConstraintLayout only)
+        - app:hintEnabled="false": Disables floating hint animation in TextInputLayout
+    -->
 
 
 

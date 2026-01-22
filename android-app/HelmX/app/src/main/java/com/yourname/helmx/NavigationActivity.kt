@@ -1,3 +1,9 @@
+/**
+ * File: NavigationActivity.kt
+ * Purpose: Provides map-based navigation functionality with location search, geocoding,
+ *          and distance calculation. Handles location permissions and Google Maps integration.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import android.Manifest
@@ -29,7 +35,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var geocoder: Geocoder
 
-    // Default location (Lahore, Pakistan)
     private val defaultLocation = LatLng(31.5204, 74.3587)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,11 +42,9 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geocoder = Geocoder(this, Locale.getDefault())
 
-        // Initialize map
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -52,32 +55,25 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
 
-        // Configure map settings
         googleMap.uiSettings.apply {
             isZoomControlsEnabled = true
             isCompassEnabled = true
-            isMyLocationButtonEnabled = false // We'll use our custom button
+            isMyLocationButtonEnabled = false
         }
 
-        // Check location permission and enable
         checkLocationPermission()
-
-        // Move camera to default location
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 12f))
     }
 
     private fun setupClickListeners() {
-        // Back button
         binding.btnBack.setOnClickListener {
             finish()
         }
 
-        // Search button
         binding.btnSearch.setOnClickListener {
             performSearch()
         }
 
-        // Search on keyboard "Search" button
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performSearch()
@@ -87,18 +83,19 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // My Location FAB
         binding.fabMyLocation.setOnClickListener {
             moveToCurrentLocation()
         }
 
-        // Start Navigation button
         binding.btnStartNavigation.setOnClickListener {
             Toast.makeText(this, "Navigation starting...", Toast.LENGTH_SHORT).show()
-            // TODO: Implement actual navigation
         }
     }
 
+    /**
+     * Performs geocoding to convert address string to coordinates.
+     * Updates map with marker and calculates distance from current location.
+     */
     private fun performSearch() {
         val searchText = binding.etSearch.text.toString().trim()
 
@@ -108,31 +105,25 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         try {
-            // Use Geocoder to convert address to coordinates
             val addresses: List<Address>? = geocoder.getFromLocationName(searchText, 1)
 
             if (addresses != null && addresses.isNotEmpty()) {
                 val address = addresses[0]
                 val location = LatLng(address.latitude, address.longitude)
 
-                // Clear previous markers
                 googleMap.clear()
 
-                // Add marker at searched location
                 googleMap.addMarker(
                     MarkerOptions()
                         .position(location)
                         .title(searchText)
                 )
 
-                // Move camera to location
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
 
-                // Show route info card
                 binding.cardRouteInfo.visibility = android.view.View.VISIBLE
                 binding.tvDestinationName.text = address.getAddressLine(0) ?: searchText
 
-                // Calculate distance from current location
                 calculateDistance(location)
 
                 Toast.makeText(this, "Location found!", Toast.LENGTH_SHORT).show()
@@ -150,10 +141,8 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            // Permission granted
             enableMyLocation()
         } else {
-            // Request permission
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
@@ -204,6 +193,10 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Calculates straight-line distance between current location and destination.
+     * Estimates travel time based on average speed of 40 km/h.
+     */
     private fun calculateDistance(destination: LatLng) {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -219,7 +212,6 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             if (location != null) {
                 val currentLatLng = LatLng(location.latitude, location.longitude)
 
-                // Calculate straight-line distance
                 val results = FloatArray(1)
                 android.location.Location.distanceBetween(
                     currentLatLng.latitude,
@@ -230,7 +222,7 @@ class NavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
 
                 val distanceKm = results[0] / 1000
-                val estimatedTime = (distanceKm / 40 * 60).toInt() // Assuming 40 km/h average
+                val estimatedTime = (distanceKm / 40 * 60).toInt()
 
                 binding.tvDistance.text = String.format("%.1f km", distanceKm)
                 binding.tvDuration.text = "$estimatedTime mins"

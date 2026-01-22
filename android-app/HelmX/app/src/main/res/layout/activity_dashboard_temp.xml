@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: activity_dashboard_temp.xml
+    Purpose: Temporary dashboard layout for testing authentication and user data display.
+            Displays user information and provides navigation buttons.
+    Author: Awais Imtiaz
+-->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

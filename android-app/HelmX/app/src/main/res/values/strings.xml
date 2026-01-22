@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: strings.xml
+    Purpose: Centralized string resources for the application.
+            Contains all user-facing text strings for internationalization support.
+    Author: Awais Imtiaz
+-->
 <resources>
     <!-- App -->
     <string name="app_name">HelmX</string>

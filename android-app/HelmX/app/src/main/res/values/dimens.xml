@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: dimens.xml
+    Purpose: Dimension resource definitions for consistent spacing and sizing.
+            Defines padding, margins, text sizes, and component dimensions.
+    Author: Awais Imtiaz
+-->
 <resources>
     <dimen name="screen_padding">24dp</dimen>
     <dimen name="helmet_size">120dp</dimen>

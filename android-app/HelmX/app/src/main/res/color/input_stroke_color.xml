@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Save this file in: res/color/input_stroke_color.xml -->
+<!--
+    File: input_stroke_color.xml
+    Purpose: Color state list for input field stroke colors.
+            Changes color based on focus state: blue when focused, gray when not focused.
+    Author: Awais Imtiaz
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:color="#00B4D8" android:state_focused="true"/>
     <item android:color="#30363D" android:state_focused="false"/>

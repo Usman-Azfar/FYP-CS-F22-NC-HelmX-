@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: activity_navigation.xml
+    Purpose: Layout definition for navigation screen with Google Maps integration.
+            Includes search functionality, location controls, and route information display.
+    Author: Awais Imtiaz
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

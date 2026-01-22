@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: colors.xml
+    Purpose: Color resource definitions for the application theme.
+            Defines primary, secondary, text, input, and button color palettes.
+    Author: Awais Imtiaz
+-->
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>

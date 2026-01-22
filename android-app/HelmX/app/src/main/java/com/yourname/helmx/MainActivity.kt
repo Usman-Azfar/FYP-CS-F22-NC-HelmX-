@@ -1,3 +1,9 @@
+/**
+ * File: MainActivity.kt
+ * Purpose: Default launcher activity with edge-to-edge display support.
+ *          Currently serves as a placeholder activity.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import android.os.Bundle

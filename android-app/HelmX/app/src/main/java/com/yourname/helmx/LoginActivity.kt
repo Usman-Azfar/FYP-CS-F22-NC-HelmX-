@@ -1,3 +1,9 @@
+/**
+ * File: LoginActivity.kt
+ * Purpose: Handles user authentication and login functionality. Validates user credentials,
+ *          manages login state, and navigates to dashboard upon successful authentication.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import android.content.Intent
@@ -11,10 +17,7 @@ import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
-    // ViewBinding - type-safe access to views
     private lateinit var binding: ActivityLoginBinding
-
-    // AuthManager instance
     private val authManager = AuthManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,93 +37,77 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        // Login button click
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
 
-            // Validate inputs
             if (validateLoginInputs(email, password)) {
                 performLogin(email, password)
             }
         }
 
-        // Sign up text click
         binding.tvSignUp.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
 
-        // Google Sign-In button (we'll implement this later)
         binding.btnGoogleSignIn.setOnClickListener {
             Toast.makeText(this, "Google Sign-In coming soon!", Toast.LENGTH_SHORT).show()
         }
 
-        // Forgot password click
         binding.tvForgotPassword.setOnClickListener {
-            // TODO: Implement password reset
             Toast.makeText(this, "Password reset coming soon!", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun validateLoginInputs(email: String, password: String): Boolean {
-        // Check if email is empty
         if (email.isEmpty()) {
             binding.tilEmail.error = "Email is required"
             return false
         }
 
-        // Check if email is valid format
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.tilEmail.error = "Invalid email format"
             return false
         }
 
-        // Clear email error
         binding.tilEmail.error = null
 
-        // Check if password is empty
         if (password.isEmpty()) {
             binding.tilPassword.error = "Password is required"
             return false
         }
 
-        // Check password length
         if (password.length < 6) {
             binding.tilPassword.error = "Password must be at least 6 characters"
             return false
         }
 
-        // Clear password error
         binding.tilPassword.error = null
-
         return true
     }
 
+    /**
+     * Performs asynchronous login operation with error handling.
+     * Uses pattern matching to provide user-friendly error messages.
+     */
     private fun performLogin(email: String, password: String) {
-        // Disable button to prevent multiple clicks
         binding.btnLogin.isEnabled = false
         binding.btnLogin.text = "Logging in..."
 
-        // Launch coroutine for async operation
         lifecycleScope.launch {
-            // Call AuthManager sign in method
             val result = authManager.signInWithEmail(email, password)
 
-            // Handle result
             result.fold(
                 onSuccess = { uid ->
-                    // Login successful
                     Toast.makeText(
                         this@LoginActivity,
                         "Welcome back!",
                         Toast.LENGTH_SHORT
                     ).show()
-
                     navigateToDashboard()
                 },
                 onFailure = { exception ->
-                    // Login failed
                     val errorMessage = when {
                         exception.message?.contains("password") == true ->
                             "Incorrect password"
@@ -138,7 +125,6 @@ class LoginActivity : AppCompatActivity() {
                         Toast.LENGTH_LONG
                     ).show()
 
-                    // Re-enable button
                     binding.btnLogin.isEnabled = true
                     binding.btnLogin.text = "Log In"
                 }
@@ -148,7 +134,6 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToDashboard() {
         val intent = Intent(this, DashboardActivity::class.java)
-        // Clear back stack so user can't go back to login
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()

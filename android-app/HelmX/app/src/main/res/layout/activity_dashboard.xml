@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: activity_dashboard.xml
+    Purpose: Layout definition for main dashboard screen displaying user statistics.
+            Includes cards for active rides, total distance, average speed, and carbon saved.
+    Author: Awais Imtiaz
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

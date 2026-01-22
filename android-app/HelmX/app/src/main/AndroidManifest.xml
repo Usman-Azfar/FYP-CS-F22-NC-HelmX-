@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: AndroidManifest.xml
+    Purpose: Defines application configuration, permissions, activities, and metadata.
+            Declares app components and required system permissions for Maps and Location services.
+    Author: Awais Imtiaz
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 

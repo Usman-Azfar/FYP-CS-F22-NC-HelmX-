@@ -1,3 +1,9 @@
+/**
+ * File: ExampleUnitTest.kt
+ * Purpose: Unit test class for local testing on development machine.
+ *          Provides example test cases for basic functionality validation.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import org.junit.Test

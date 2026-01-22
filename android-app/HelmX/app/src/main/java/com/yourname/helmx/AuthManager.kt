@@ -1,3 +1,10 @@
+/**
+ * File: AuthManager.kt
+ * Purpose: Manages user authentication operations using Firebase Authentication
+ *          and Firestore database. Handles user sign-up, sign-in, sign-out,
+ *          and user data retrieval operations.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import com.google.firebase.auth.FirebaseAuth
@@ -12,7 +19,7 @@ class AuthManager {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    fun getCurrentUser() : FirebaseUser? {
+    fun getCurrentUser(): FirebaseUser? {
         return auth.currentUser
     }
 
@@ -57,7 +64,6 @@ class AuthManager {
             Result.success(uid)
 
         } catch (e: Exception) {
-            // If anything fails, return error message
             Result.failure(e)
         }
     }
@@ -67,15 +73,9 @@ class AuthManager {
         password: String
     ): Result<String> {
         return try {
-            // Authenticate user
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
-
-            // Get UID
             val uid = authResult.user?.uid ?: throw Exception("Log in failed")
-
-            // Return success
             Result.success(uid)
-
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -89,18 +89,15 @@ class AuthManager {
      */
     suspend fun getUserData(uid: String): Result<User> {
         return try {
-            // Fetch user document from Firestore
             val document = firestore.collection("users")
                 .document(uid)
                 .get()
                 .await()
 
-            // Convert Firestore document to User object
             val user = document.toObject(User::class.java)
                 ?: throw Exception("User data not found")
 
             Result.success(user)
-
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: ic_launcher_background.xml
+    Purpose: Background layer for adaptive launcher icon.
+            Provides the base background color and pattern for the app icon.
+    Author: Awais Imtiaz
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"

@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: activity_main.xml
+    Purpose: Layout definition for main activity with edge-to-edge display support.
+            Currently serves as a placeholder activity.
+    Author: Awais Imtiaz
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Save in res/color/bottom_nav_color.xml -->
+<!--
+    File: bottom_nav_color.xml
+    Purpose: Color state list for bottom navigation item colors.
+            Changes color based on selection state: blue when selected, gray when unselected.
+    Author: Awais Imtiaz
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:color="#00B4D8" android:state_checked="true"/>
     <item android:color="#8B949E" android:state_checked="false"/>

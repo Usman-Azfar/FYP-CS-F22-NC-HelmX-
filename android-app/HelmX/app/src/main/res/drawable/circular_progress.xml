@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: circular_progress.xml
+    Purpose: Circular progress indicator using layer-list with rotation and gradient.
+            Creates a ring shape with background and animated progress layer.
+    Author: Awais Imtiaz
+    Note: Uses rotation transform starting at 270 degrees to begin progress from top.
+          Gradient creates smooth color transition from start to end color.
+-->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape android:shape="ring"

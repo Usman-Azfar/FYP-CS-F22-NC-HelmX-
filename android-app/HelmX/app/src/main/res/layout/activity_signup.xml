@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: activity_signup.xml
+    Purpose: Layout definition for user registration screen with form validation.
+            Includes input fields for full name, email, phone, password, and terms acceptance.
+    Author: Awais Imtiaz
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

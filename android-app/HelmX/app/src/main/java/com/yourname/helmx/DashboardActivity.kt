@@ -1,3 +1,9 @@
+/**
+ * File: DashboardActivity.kt
+ * Purpose: Main dashboard screen that displays user information after successful login.
+ *          Provides navigation to other app features and handles user logout functionality.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import android.content.Intent
@@ -19,39 +25,31 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardTempBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Check if user is logged in
         val currentUser = authManager.getCurrentUser()
         if (currentUser == null) {
             navigateToLogin()
             return
         }
 
-        // Load user data
         loadUserData(currentUser.uid)
-
-        // Setup button click listeners
         setupClickListeners()
     }
 
     private fun setupClickListeners() {
-        // Navigate to Navigation page
         binding.btnNavigation.setOnClickListener {
             val intent = Intent(this, NavigationActivity::class.java)
             startActivity(intent)
         }
 
-        // Navigate to Settings page
-//        binding.btnSettings.setOnClickListener {
-//            val intent = Intent(this, SettingsActivity::class.java)
-//            startActivity(intent)
-//        }
-
-        // Logout button
         binding.btnLogout.setOnClickListener {
             logout()
         }
     }
 
+    /**
+     * Loads user data from Firestore asynchronously and updates UI.
+     * Uses Result.fold to handle both success and failure cases elegantly.
+     */
     private fun loadUserData(uid: String) {
         binding.tvStatus.text = "Loading user data..."
 
@@ -60,7 +58,6 @@ class DashboardActivity : AppCompatActivity() {
 
             result.fold(
                 onSuccess = { user ->
-                    // Display user information
                     binding.tvWelcome.text = "Welcome, ${user.fullname}!"
                     binding.tvEmail.text = "Email: ${user.email}"
                     binding.tvPhone.text = "Phone: ${user.phone}"

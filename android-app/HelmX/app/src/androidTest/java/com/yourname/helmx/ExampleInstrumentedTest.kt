@@ -1,3 +1,9 @@
+/**
+ * File: ExampleInstrumentedTest.kt
+ * Purpose: Instrumented test class for Android device testing.
+ *          Provides example test cases for app context validation.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import androidx.test.platform.app.InstrumentationRegistry

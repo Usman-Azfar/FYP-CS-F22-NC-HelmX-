@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Save in res/menu/bottom_navigation_menu.xml -->
+<!--
+    File: bottom_navigation_menu.xml
+    Purpose: Menu definition for bottom navigation bar with home, analytics, navigation, and settings items.
+    Author: Awais Imtiaz
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"

@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: data_extraction_rules.xml
+    Purpose: Defines rules for cloud backup and device transfer data extraction.
+            Controls what data is included in backups and transfers.
+    Author: Awais Imtiaz
 -->
 <data-extraction-rules>
     <cloud-backup>

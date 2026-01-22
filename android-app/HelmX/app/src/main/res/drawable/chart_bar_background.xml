@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: chart_bar_background.xml
+    Purpose: Shape drawable for inactive chart bar with rounded corners.
+            Used to represent inactive/default data points in mini charts.
+    Author: Awais Imtiaz
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="#30363D"/>

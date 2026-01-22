@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: themes.xml (Night)
+    Purpose: Dark theme definitions for night mode using Material Design 3.
+            Customizes colors and styles for dark mode display.
+    Author: Awais Imtiaz
+-->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.HelmX" parent="Theme.Material3.DayNight.NoActionBar">

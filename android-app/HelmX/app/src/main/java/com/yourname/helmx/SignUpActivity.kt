@@ -1,3 +1,9 @@
+/**
+ * File: SignUpActivity.kt
+ * Purpose: Handles user registration with email and password. Validates user input,
+ *          creates new user accounts in Firebase, and navigates to dashboard upon success.
+ * Author: Usman Azfar
+ */
 package com.yourname.helmx
 
 import android.content.Intent
@@ -23,7 +29,6 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        // Sign up button
         binding.btnSignUp.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
@@ -37,17 +42,19 @@ class SignUpActivity : AppCompatActivity() {
             }
         }
 
-        // Login text click
         binding.tvLogin.setOnClickListener {
-            finish() // Go back to login screen
+            finish()
         }
 
-        // Google Sign-Up button
         binding.btnGoogleSignUp.setOnClickListener {
             Toast.makeText(this, "Google Sign-Up coming soon!", Toast.LENGTH_SHORT).show()
         }
     }
 
+    /**
+     * Validates all sign-up input fields including format checks and password matching.
+     * Returns true only if all validations pass.
+     */
     private fun validateSignUpInputs(
         fullName: String,
         email: String,
@@ -56,14 +63,12 @@ class SignUpActivity : AppCompatActivity() {
         confirmPassword: String,
         termsAccepted: Boolean
     ): Boolean {
-        // Validate full name
         if (fullName.isEmpty()) {
             binding.tilFullName.error = "Full name is required"
             return false
         }
         binding.tilFullName.error = null
 
-        // Validate email
         if (email.isEmpty()) {
             binding.tilEmail.error = "Email is required"
             return false
@@ -74,7 +79,6 @@ class SignUpActivity : AppCompatActivity() {
         }
         binding.tilEmail.error = null
 
-        // Validate phone
         if (phone.isEmpty()) {
             binding.tilPhone.error = "Phone number is required"
             return false
@@ -85,7 +89,6 @@ class SignUpActivity : AppCompatActivity() {
         }
         binding.tilPhone.error = null
 
-        // Validate password
         if (password.isEmpty()) {
             binding.tilPassword.error = "Password is required"
             return false
@@ -96,7 +99,6 @@ class SignUpActivity : AppCompatActivity() {
         }
         binding.tilPassword.error = null
 
-        // Validate confirm password
         if (confirmPassword.isEmpty()) {
             binding.tilConfirmPassword.error = "Please confirm your password"
             return false
@@ -107,7 +109,6 @@ class SignUpActivity : AppCompatActivity() {
         }
         binding.tilConfirmPassword.error = null
 
-        // Validate terms checkbox
         if (!termsAccepted) {
             Toast.makeText(this, "Please accept Terms & Conditions", Toast.LENGTH_SHORT).show()
             return false
@@ -116,6 +117,10 @@ class SignUpActivity : AppCompatActivity() {
         return true
     }
 
+    /**
+     * Performs asynchronous user registration with comprehensive error handling.
+     * Uses pattern matching to provide user-friendly error messages for different failure scenarios.
+     */
     private fun performSignUp(fullName: String, email: String, phone: String, password: String) {
         binding.btnSignUp.isEnabled = false
         binding.btnSignUp.text = "Creating account..."
@@ -131,7 +136,6 @@ class SignUpActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    // Navigate to dashboard
                     val intent = Intent(this@SignUpActivity, DashboardActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)

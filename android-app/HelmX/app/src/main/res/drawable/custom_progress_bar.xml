@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: custom_progress_bar.xml
+    Purpose: Horizontal progress bar using layer-list with clip animation.
+            Background layer shows total progress, clipped layer shows current progress.
+    Author: Awais Imtiaz
+    Note: Clip element automatically animates based on progress value set programmatically.
+-->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Background -->
     <item android:id="@android:id/background">

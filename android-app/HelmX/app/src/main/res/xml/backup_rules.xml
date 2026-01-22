@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    File: backup_rules.xml
+    Purpose: Defines rules for Android Auto Backup feature.
+            Specifies which app data should be included or excluded from backups.
+    Author: Awais Imtiaz
+    Note: This file is ignored for devices older than API 31
 -->
 <full-backup-content>
     <!--
