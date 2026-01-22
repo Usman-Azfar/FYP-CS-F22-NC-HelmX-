@@ -1,3 +1,10 @@
+"""
+File: eye_detection.py
+Purpose: Real-time driver drowsiness detection system using computer vision and deep learning.
+         Monitors eye state through live video feed, combining CNN predictions and Eye Aspect
+         Ratio (EAR) metrics to detect drowsiness and trigger alerts.
+Author: Hamza Ahmad
+"""
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -36,7 +43,7 @@ def enhance_eye_image(eye_img):
         return None
     
     gray = cv2.cvtColor(eye_img, cv2.COLOR_BGR2GRAY) if len(eye_img.shape) == 3 else eye_img
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return cv2.GaussianBlur(clahe.apply(gray), (5, 5), 0)
 
 def preprocess_eye_image(eye_img):
@@ -48,7 +55,10 @@ def preprocess_eye_image(eye_img):
     return np.expand_dims(resized / 255.0, axis=-1)
 
 def get_eye_region(frame, landmarks, eye_indices):
-    """Extract eye region from frame using landmarks"""
+    """
+    Extract eye region from frame using landmarks with 30% padding for context.
+    Handles boundary cases to prevent index out of bounds errors.
+    """
     if frame is None or landmarks is None:
         return None
     
@@ -71,7 +81,11 @@ def get_eye_region(frame, landmarks, eye_indices):
     return eye_region if eye_region.size > 0 else None
 
 def calculate_eye_aspect_ratio(landmarks, eye_indices):
-    """Calculate Eye Aspect Ratio (EAR)"""
+    """
+    Calculate Eye Aspect Ratio (EAR) using specific landmark points.
+    EAR = (vertical distance / horizontal distance) * 100
+    Lower values indicate closed eyes. Uses indices 12 (top), 4 (bottom), 0 (left), 8 (right).
+    """
     try:
         y_top = landmarks.landmark[eye_indices[12]].y
         y_bottom = landmarks.landmark[eye_indices[4]].y
@@ -92,7 +106,7 @@ def load_model():
     return None
 
 def play_alarm():
-    """Play the alarm sound file"""
+    """Play the alarm sound file using Windows sound system"""
     if os.path.exists(ALARM_FILE):
         try:
             winsound.PlaySound(ALARM_FILE, winsound.SND_FILENAME | winsound.SND_ASYNC)
@@ -102,7 +116,10 @@ def play_alarm():
         print(f"Warning: Alarm file '{ALARM_FILE}' not found")
 
 def main():
-    """Main function for eye detection"""
+    """
+    Main function implementing real-time drowsiness detection pipeline.
+    Processes video frames, detects eye state, and triggers alerts when drowsiness is detected.
+    """
     eye_model = load_model()
     if eye_model is None:
         print("Error: Failed to load eye state model")
@@ -113,10 +130,10 @@ def main():
         print("Error: Could not open camera")
         return
 
+    # Calculate frame-based threshold for drowsiness detection
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
     closed_frames_threshold = int(CLOSED_FRAMES_THRESHOLD_SECONDS * fps)
 
-    # State tracking variables
     prediction_history = []
     closed_frames_counter = 0
     eye_closed_start_time = 0
@@ -159,11 +176,14 @@ def main():
                     right_pred = eye_model.predict(np.expand_dims(right_processed, axis=0), verbose=0)[0][0]
                     eye_pred = (left_pred + right_pred) / 2.0
                     
+                    # Maintain sliding window of predictions for smoothing
                     prediction_history.append(eye_pred)
                     if len(prediction_history) > PREDICTION_HISTORY_SIZE:
                         prediction_history.pop(0)
                     
+                    # Calculate moving average to reduce noise and false positives
                     smoothed_pred = sum(prediction_history) / len(prediction_history)
+                    # Dual-metric detection: eye closed if CNN prediction OR EAR indicates closure
                     eyes_closed = smoothed_pred < EYE_STATE_THRESHOLD or ear_value < EAR_THRESHOLD
                     
                     status_text = f"{'Closed' if eyes_closed else 'Open'} (P:{smoothed_pred:.2f} E:{ear_value:.1f})"
@@ -180,12 +200,12 @@ def main():
                 closed_duration = current_time - eye_closed_start_time
                 cv2.putText(frame, f"Closed Time: {closed_duration:.1f}s", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-        # Drowsiness detection logic
+        # Drowsiness detection: trigger alert if eyes closed for threshold duration
         if eyes_closed:
             closed_frames_counter += 1
             if closed_frames_counter >= closed_frames_threshold:
                 cv2.putText(frame, "ALERT: EYES CLOSED", (10, frame.shape[0] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-                # Play alarm if cooldown has passed
+                # Alarm cooldown prevents excessive audio alerts
                 if current_time - last_alarm_time >= ALARM_COOLDOWN_SECONDS:
                     play_alarm()
                     last_alarm_time = current_time
