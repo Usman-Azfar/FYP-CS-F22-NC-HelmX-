@@ -124,7 +124,6 @@
   }
 }
 
-/* Adding custom animations for shimmer, float, and pulse effects */
 @keyframes shimmer {
   0% {
     background-position: 200% center;
