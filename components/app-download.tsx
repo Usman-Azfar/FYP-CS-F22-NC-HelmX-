@@ -1,3 +1,9 @@
+/**
+ * File: app-download.tsx
+ * Purpose: App download section with animated content reveal and staggered feature list animations.
+ *          Uses IntersectionObserver for scroll-triggered visibility and progressive content animation.
+ * Author: Hamza Ahmad
+ */
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -7,6 +13,10 @@ import { useEffect, useState } from "react"
 export function AppDownload() {
   const [isVisible, setIsVisible] = useState(false)
 
+  /**
+   * Observes the download section for scroll-triggered animation.
+   * Triggers visibility state when section enters viewport.
+   */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {

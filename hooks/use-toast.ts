@@ -1,3 +1,9 @@
+/**
+ * File: use-toast.ts
+ * Purpose: Toast notification system using reducer pattern with global state management.
+ *          Implements toast queue management, auto-dismissal, and update/dismiss operations.
+ * Author: Hamza Ahmad
+ */
 'use client'
 
 import * as React from 'react'
@@ -54,6 +60,10 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+/**
+ * Adds a toast to the removal queue with auto-dismiss timeout.
+ * Prevents duplicate timeouts for the same toast ID.
+ */
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
@@ -70,6 +80,10 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+/**
+ * Reducer function managing toast state with action-based updates.
+ * Handles adding, updating, dismissing, and removing toasts with queue management.
+ */
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'ADD_TOAST':
@@ -127,6 +141,10 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
+/**
+ * Dispatches actions to update global toast state and notifies all listeners.
+ * Implements observer pattern for state synchronization across components.
+ */
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
@@ -165,6 +183,10 @@ function toast({ ...props }: Toast) {
   }
 }
 
+/**
+ * Custom hook for toast notifications with global state subscription.
+ * Registers component as listener and cleans up on unmount to prevent memory leaks.
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

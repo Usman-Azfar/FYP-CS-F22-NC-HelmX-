@@ -1,3 +1,9 @@
+/**
+ * File: layout.tsx
+ * Purpose: Root layout component that wraps all pages with global styles, fonts, and metadata.
+ *          Configures Next.js metadata and provides the base HTML structure for the application.
+ * Author: Hamza Ahmad
+ */
 import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"

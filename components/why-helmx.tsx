@@ -1,3 +1,9 @@
+/**
+ * File: why-helmx.tsx
+ * Purpose: "Why HelmX" section explaining product benefits with scroll-triggered animations.
+ *          Implements progressive content reveal with staggered delays for list items.
+ * Author: Hamza Ahmad
+ */
 "use client"
 
 import { CheckCircle2 } from "lucide-react"
@@ -15,6 +21,10 @@ const benefits = [
 export function WhyHelmX() {
   const [isVisible, setIsVisible] = useState(false)
 
+  /**
+   * Observes the about section for scroll-triggered animation.
+   * Triggers visibility state when section enters viewport threshold.
+   */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {

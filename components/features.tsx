@@ -1,3 +1,9 @@
+/**
+ * File: features.tsx
+ * Purpose: Features section component displaying HelmX safety features with scroll-triggered animations.
+ *          Uses IntersectionObserver API for progressive card reveal animations and staggered visibility effects.
+ * Author: Hamza Ahmad
+ */
 'use client'
 
 import * as React from 'react'
@@ -76,6 +82,11 @@ export function Features() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const statsRef = useRef<HTMLDivElement | null>(null)
 
+  /**
+   * Sets up IntersectionObserver instances for each feature card and stats section.
+   * Implements staggered animation delays based on card index for progressive reveal effect.
+   * Uses Set to prevent duplicate entries in visibleCards array.
+   */
   useEffect(() => {
     const observers = cardRefs.current.map((card, index) => {
       if (!card) return null

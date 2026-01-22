@@ -1,3 +1,9 @@
+/**
+ * File: page.tsx
+ * Purpose: Main homepage component that renders all sections of the landing page.
+ *          Composes header, hero, features, tech stack, why HelmX, app download, and footer sections.
+ * Author: Hamza Ahmad
+ */
 import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { Features } from "@/components/features"

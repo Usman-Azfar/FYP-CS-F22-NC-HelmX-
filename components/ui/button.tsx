@@ -1,3 +1,9 @@
+/**
+ * File: button.tsx
+ * Purpose: Button component with multiple variants and sizes using class-variance-authority.
+ *          Provides accessible, customizable button with Radix UI Slot for composition.
+ * Author: Hamza Ahmad
+ */
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'

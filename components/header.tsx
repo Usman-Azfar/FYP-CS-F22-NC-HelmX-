@@ -1,3 +1,9 @@
+/**
+ * File: header.tsx
+ * Purpose: Fixed navigation header component with logo, navigation links, and status badge.
+ *          Provides sticky header with backdrop blur effect and smooth hover animations.
+ * Author: Hamza Ahmad
+ */
 import { Badge } from "@/components/ui/badge"
 
 export function Header() {

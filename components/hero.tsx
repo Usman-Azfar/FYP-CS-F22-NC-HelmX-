@@ -1,3 +1,9 @@
+/**
+ * File: hero.tsx
+ * Purpose: Hero section component with animated background effects and fade-in animations.
+ *          Implements mouse tracking for parallax-like background blur effects.
+ * Author: Hamza Ahmad
+ */
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -8,6 +14,10 @@ export function Hero() {
   const [isVisible, setIsVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
+  /**
+   * Sets up mouse tracking for parallax background effects and fade-in animation.
+   * Calculates normalized mouse position relative to viewport for smooth background movement.
+   */
   useEffect(() => {
     setIsVisible(true)
 

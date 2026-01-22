@@ -1,3 +1,9 @@
+/**
+ * File: footer.tsx
+ * Purpose: Footer component with navigation links, company information, and hover animations.
+ *          Implements interactive link hover effects with underline animations.
+ * Author: Hamza Ahmad
+ */
 "use client"
 
 import { useState } from "react"

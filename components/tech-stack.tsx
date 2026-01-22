@@ -1,3 +1,9 @@
+/**
+ * File: tech-stack.tsx
+ * Purpose: Technology stack section displaying technologies used in HelmX with hover interactions.
+ *          Implements IntersectionObserver for scroll animations and complex hover state management.
+ * Author: Hamza Ahmad
+ */
 "use client"
 
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +42,10 @@ export function TechStack() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
 
+  /**
+   * Creates IntersectionObserver for each technology card with staggered animation delays.
+   * Alternates animation direction (up/down) based on card index for visual variety.
+   */
   useEffect(() => {
     const observers = cardRefs.current.map((card, index) => {
       if (!card) return null

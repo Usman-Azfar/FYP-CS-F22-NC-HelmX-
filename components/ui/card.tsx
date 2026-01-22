@@ -1,3 +1,9 @@
+/**
+ * File: card.tsx
+ * Purpose: Card component and sub-components (CardHeader, CardTitle, etc.) for content containers.
+ *          Provides consistent card styling with semantic structure.
+ * Author: Hamza Ahmad
+ */
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
