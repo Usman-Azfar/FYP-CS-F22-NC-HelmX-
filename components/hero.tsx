@@ -8,7 +8,9 @@
 
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
+import Link from "next/link"
 import { useEffect, useState } from "react"
+import LineWaves from "@/components/line-waves"
 
 export function Hero() {
   const [isVisible, setIsVisible] = useState(false)
@@ -33,7 +35,27 @@ export function Hero() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32">
+    <section
+      id="hero"
+      className="relative mt-16 flex min-h-[calc(100svh-4rem)] items-center overflow-hidden py-10 md:py-12"
+    >
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <LineWaves
+          speed={0.3}
+          innerLineCount={32}
+          outerLineCount={36}
+          warpIntensity={1}
+          rotation={-45}
+          edgeFadeWidth={0}
+          colorCycleSpeed={1}
+          brightness={0.2}
+          color1="#ffffff"
+          color2="#ffffff"
+          color3="#ffffff"
+          enableMouseInteraction
+          mouseInfluence={2}
+        />
+      </div>
       <div className="absolute inset-0 -z-10">
         <div
           className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-primary/20 blur-3xl transition-transform duration-1000"
@@ -86,19 +108,23 @@ export function Hero() {
             }`}
           >
             <Button
+              asChild
               size="lg"
               className="group relative overflow-hidden bg-primary transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-2xl hover:shadow-primary/50"
             >
-              <span className="relative z-10">Explore Features</span>
-              <ArrowRight className="relative z-10 ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              <div className="absolute inset-0 -z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              <Link href="/buy">
+                <span className="relative z-10">Build Your Helmet</span>
+                <ArrowRight className="relative z-10 ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <div className="absolute inset-0 -z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] transition-transform duration-1000 group-hover:translate-x-[100%]"></div>
+              </Link>
             </Button>
             <Button
+              asChild
               size="lg"
               variant="outline"
               className="group bg-transparent transition-all hover:scale-105 hover:border-primary hover:bg-primary/5"
             >
-              Watch Demo
+              <a href="#features">Explore Features</a>
             </Button>
           </div>
 

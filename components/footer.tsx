@@ -6,7 +6,20 @@
  */
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
+
+const productLinks = [
+  { label: "Features", href: "/#features" },
+  { label: "Technology", href: "/#technology" },
+  { label: "Download App", href: "/#download" },
+]
+
+const aboutLinks = [
+  { label: "Why HelmX", href: "/#about" },
+  { label: "Team", href: "/#about" },
+  { label: "Contact", href: "/#download" },
+]
 
 export function Footer() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
@@ -38,23 +51,23 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-sm font-semibold">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              {["Features", "Technology", "Download App"].map((item, index) => (
-                <li key={index}>
-                  <a
-                    href={`#${item.toLowerCase().replace(" ", "-")}`}
-                    onMouseEnter={() => setHoveredLink(item)}
+              {productLinks.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    onMouseEnter={() => setHoveredLink(label)}
                     onMouseLeave={() => setHoveredLink(null)}
                     className={`relative inline-block transition-all duration-300 hover:text-primary hover:translate-x-1 ${
-                      hoveredLink === item ? "text-primary translate-x-1" : ""
+                      hoveredLink === label ? "text-primary translate-x-1" : ""
                     }`}
                   >
-                    {item}
+                    {label}
                     <span
                       className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                        hoveredLink === item ? "w-full" : "w-0"
+                        hoveredLink === label ? "w-full" : "w-0"
                       }`}
-                    ></span>
-                  </a>
+                    />
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -63,23 +76,23 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-sm font-semibold">About</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              {["Why HelmX", "Team", "Contact"].map((item, index) => (
-                <li key={index}>
-                  <a
-                    href={item === "Why HelmX" ? "#about" : "#"}
-                    onMouseEnter={() => setHoveredLink(item)}
+              {aboutLinks.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    onMouseEnter={() => setHoveredLink(label)}
                     onMouseLeave={() => setHoveredLink(null)}
                     className={`relative inline-block transition-all duration-300 hover:text-primary hover:translate-x-1 ${
-                      hoveredLink === item ? "text-primary translate-x-1" : ""
+                      hoveredLink === label ? "text-primary translate-x-1" : ""
                     }`}
                   >
-                    {item}
+                    {label}
                     <span
                       className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                        hoveredLink === item ? "w-full" : "w-0"
+                        hoveredLink === label ? "w-full" : "w-0"
                       }`}
-                    ></span>
-                  </a>
+                    />
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -87,9 +100,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t border-border/40 pt-8 text-center text-sm text-muted-foreground">
-          <p className="transition-all hover:text-primary hover:scale-105">
-            Built with AI, designed for safety. Powered by innovation.
-          </p>
+          <p className="transition-all hover:text-primary hover:scale-105">Built with AI, designed for safety. Powered by innovation.</p>
         </div>
       </div>
     </footer>

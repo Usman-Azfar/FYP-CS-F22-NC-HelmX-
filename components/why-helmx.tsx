@@ -7,7 +7,8 @@
 "use client"
 
 import { CheckCircle2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import SoftAurora from "@/components/soft-aurora"
 
 const benefits = [
   "Proactive accident prevention",
@@ -20,12 +21,19 @@ const benefits = [
 
 export function WhyHelmX() {
   const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLElement | null>(null)
 
   /**
    * Observes the about section for scroll-triggered animation.
    * Triggers visibility state when section enters viewport threshold.
    */
   useEffect(() => {
+    const section = sectionRef.current
+    if (!section) {
+      setIsVisible(true)
+      return
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -37,18 +45,40 @@ export function WhyHelmX() {
       { threshold: 0.2 },
     )
 
-    const section = document.getElementById("about")
-    if (section) observer.observe(section)
+    observer.observe(section)
+
+    const fallbackTimer = window.setTimeout(() => {
+      setIsVisible(true)
+    }, 400)
 
     return () => observer.disconnect()
+      , window.clearTimeout(fallbackTimer)
   }, [])
 
   return (
-    <section id="about" className="py-20 md:py-32">
+    <section ref={sectionRef} id="why-helmx" className="relative overflow-hidden py-20 md:py-32">
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <SoftAurora
+          speed={0.6}
+          scale={1.5}
+          brightness={1}
+          color1="#f7f7f7"
+          color2="#e100ff"
+          noiseFrequency={2.5}
+          noiseAmplitude={1}
+          bandHeight={0.5}
+          bandSpread={1}
+          octaveDecay={0.1}
+          layerOffset={0}
+          colorSpeed={1}
+          enableMouseInteraction
+          mouseInfluence={0.25}
+        />
+      </div>
       <div className="container mx-auto px-4">
         <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:items-center">
           <div
-            className={`transition-all duration-700 ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"}`}
+            className={`relative z-10 transition-all duration-700 ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"}`}
           >
             <h2 className="mb-6 text-balance text-4xl font-bold md:text-5xl">Why HelmX?</h2>
             <p className="mb-8 text-pretty text-lg leading-relaxed text-muted-foreground">
@@ -83,7 +113,7 @@ export function WhyHelmX() {
           </div>
 
           <div
-            className={`relative transition-all duration-700 delay-300 ${isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"}`}
+            className={`relative z-10 transition-all duration-700 delay-300 ${isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"}`}
           >
             <div className="aspect-square overflow-hidden rounded-2xl border border-border/40 bg-muted">
               <img
