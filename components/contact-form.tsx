@@ -49,11 +49,11 @@ export function ContactForm() {
         body: JSON.stringify(formData),
       })
 
+      const result = await response.json().catch(() => ({}))
       if (!response.ok) {
-        throw new Error("Failed to send message")
+        throw new Error(result?.error || "Failed to send your message. Please try again.")
       }
 
-      const result = await response.json()
       const userEmailStatus = result?.emailStatus?.user
 
       toast({
@@ -76,7 +76,7 @@ export function ContactForm() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to send your message. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to send your message. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -100,6 +100,7 @@ export function ContactForm() {
           name="name"
           placeholder="Your name"
           value={formData.name}
+          maxLength={100}
           onChange={handleChange}
           required
           className="border-border/50 bg-background/50"
@@ -114,6 +115,7 @@ export function ContactForm() {
           type="email"
           placeholder="your.email@example.com"
           value={formData.email}
+          maxLength={254}
           onChange={handleChange}
           required
           className="border-border/50 bg-background/50"
@@ -127,6 +129,7 @@ export function ContactForm() {
           name="subject"
           placeholder="What is this about?"
           value={formData.subject}
+          maxLength={200}
           onChange={handleChange}
           required
           className="border-border/50 bg-background/50"
@@ -140,6 +143,7 @@ export function ContactForm() {
           name="message"
           placeholder="Tell us more about your inquiry..."
           value={formData.message}
+          maxLength={5000}
           onChange={handleChange}
           required
           rows={6}

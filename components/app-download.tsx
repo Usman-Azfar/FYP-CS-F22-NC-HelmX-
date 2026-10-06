@@ -6,6 +6,7 @@
  */
 "use client"
 
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Download, Smartphone, Star, Users, TrendingUp } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -97,9 +98,12 @@ export function AppDownload() {
               className={`relative flex items-center justify-center transition-all duration-700 delay-300 ${isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"}`}
             >
               <div className="relative">
-                <img
+                <Image
                   src="/smartphone-mockup-showing-helmet-app-dashboard.jpg"
                   alt="HelmX Mobile App"
+                  width={1122}
+                  height={1402}
+                  sizes="400px"
                   className="relative h-[500px] w-auto rounded-3xl shadow-2xl"
                 />
                 <div

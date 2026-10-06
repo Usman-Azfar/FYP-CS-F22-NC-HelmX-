@@ -1,127 +1,73 @@
 # Stripe Integration Setup Guide
 
-## 1. Install Dependencies
+HelmX uses **Stripe Checkout** (Stripe's hosted payment page). The browser never touches card data, and no client-side Stripe library or publishable key is needed.
+
+## 1. Get your keys
+
+1. Open the [Stripe Dashboard → API keys](https://dashboard.stripe.com/apikeys) (use test mode while developing).
+2. Copy the **Secret key** (`sk_test_...`) into `STRIPE_SECRET_KEY` in `.env.local`.
+3. Set `NEXT_PUBLIC_APP_URL` to the site's public URL (e.g. `http://localhost:3000`).
+
+## 2. Webhooks
+
+### Local development
 
 ```bash
-npm install @stripe/react-stripe-js @stripe/js stripe
-# or
-pnpm add @stripe/react-stripe-js @stripe/js stripe
+stripe listen --forward-to localhost:3000/api/webhook
 ```
 
-## 2. Get Stripe Keys
+Copy the printed `whsec_...` secret into `STRIPE_WEBHOOK_SECRET` and restart `npm run dev`.
 
-1. Go to [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
-2. Copy your **Publishable Key** (starts with `pk_`)
-3. Copy your **Secret Key** (starts with `sk_`)
-4. Set up a webhook endpoint for checkout.session.completed events
-5. Copy the **Webhook Signing Secret** (starts with `whsec_`)
+### Production
 
-## 3. Update Environment Variables
+In **Developers → Webhooks → Add endpoint**:
 
-Edit `.env.local`:
+- URL: `https://<your-domain>/api/webhook`
+- Events:
+  - `checkout.session.completed`
+  - `checkout.session.async_payment_succeeded`
+  - `checkout.session.async_payment_failed`
+  - `checkout.session.expired`
 
-```env
-# Stripe Keys from dashboard.stripe.com/apikeys
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key
-STRIPE_SECRET_KEY=sk_test_your_secret_key
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+Put that endpoint's signing secret in `STRIPE_WEBHOOK_SECRET`.
 
-# App URL (used for redirect after payment)
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+## 3. How it works
 
-## 4. Set Up Webhook Endpoint
+1. The user configures a helmet on `/buy`, enters an email and clicks **Pay with Stripe**.
+2. The browser sends the selected **part IDs** (never a price) to `POST /api/checkout-session`.
+3. The server prices the order from [`lib/catalog.ts`](lib/catalog.ts), saves a `PENDING` order, and creates a Checkout Session with one line item per part. The order ID is stored in the session metadata.
+4. The user pays on Stripe and is redirected to `/buy/success?session_id=...`.
+5. The webhook, and the success page as a fallback, call `finalizePaidSession` in [`lib/orders.ts`](lib/orders.ts). It marks the order `PAID` and emails the receipt **once**, no matter how many times it runs.
+6. Sessions that expire unpaid are marked `FAILED`.
 
-In Stripe Dashboard:
-1. Go to Developers → Webhooks
-2. Click "Add endpoint"
-3. Enter endpoint URL: `{your-domain}/api/webhook`
-4. Select events: `checkout.session.completed`, `payment_intent.succeeded`, `charge.failed`
-5. Copy the signing secret and add to `.env.local` as `STRIPE_WEBHOOK_SECRET`
+## 4. Changing prices or parts
 
-## 5. How It Works
+Edit [`lib/catalog.ts`](lib/catalog.ts). The configurator and the checkout API both read from it, so they always agree. Prices are whole PKR; Stripe receives them in minor units (×100).
 
-1. **User configures helmet** on `/buy` page
-2. **Enters email** and clicks "Pay with Stripe"
-3. **Frontend calls** `/api/checkout-session` with cart data
-4. **API creates** Stripe checkout session
-5. **Redirects to Stripe** hosted checkout
-6. **After payment**, Stripe sends webhook to `/api/webhook`
-7. **Webhook handler** saves order (implement in the switch case)
-8. **Success page** at `/buy?payment=success`
+## 5. Test cards
 
-## 6. Testing with Stripe Test Cards
+| Card | Number |
+| --- | --- |
+| Visa | `4242 4242 4242 4242` |
+| Visa (debit) | `4000 0566 5566 5556` |
+| Mastercard | `5555 5555 5555 4444` |
+| Declined | `4000 0000 0000 0002` |
 
-Use these test cards in development:
+Use any future expiry date and any CVC. See [Stripe's testing docs](https://docs.stripe.com/testing) for more.
 
-- **Visa**: `4242 4242 4242 4242`
-- **Visa (debit)**: `4000 0566 5566 5556`
-- **Mastercard**: `5555 5555 5555 4444`
-- **Amex**: `3782 822463 10005`
+## 6. Going live
 
-Any future date and any 3-digit CVC works.
+1. Replace `sk_test_...` with the live secret key.
+2. Create the live webhook endpoint (step 2) and use its signing secret.
+3. Set `NEXT_PUBLIC_APP_URL` to the production domain.
+4. Make a real low-value payment to confirm the whole flow.
 
-## 7. Going Live
+## 7. Troubleshooting
 
-1. Replace `pk_test_*` with `pk_live_*` keys
-2. Replace `sk_test_*` with `sk_live_*` keys in production `.env`
-3. Update `NEXT_PUBLIC_APP_URL` to your production domain
-4. Test with real payment method on staging environment
-5. Clear Stripe webhooks from test → set up with live webhook endpoint
+**"Failed to create checkout session"**: check the server logs. Usually `STRIPE_SECRET_KEY` or `DATABASE_URL` is missing or wrong.
 
-## 8. TODO - Implementation
+**Webhook returns 400 "Invalid signature"**: `STRIPE_WEBHOOK_SECRET` doesn't match the endpoint, or a proxy changed the request body.
 
-The webhook handler in `/app/api/webhook/route.ts` currently just logs events. You should:
+**Webhook returns 500 "Webhook not configured"**: `STRIPE_WEBHOOK_SECRET` is not set.
 
-1. **Save orders to database** on `checkout.session.completed`
-2. **Send confirmation email** with order details
-3. **Log failed charges** for debugging
-4. **Link order to customer email**
-
-Example webhook implementation:
-
-```typescript
-case "checkout.session.completed":
-  const session = event.data.object as Stripe.Checkout.Session
-  // Save to database
-  const order = await saveOrderToDB({
-    sessionId: session.id,
-    email: session.customer_email,
-    amount: session.amount_total,
-    cartItems: session.metadata?.cartItems,
-  })
-  // Send confirmation email
-  await sendConfirmationEmail(session.customer_email, order)
-  break
-```
-
-## 9. File Structure
-
-```
-app/
-├── api/
-│   ├── checkout-session/route.ts  → Creates Stripe session
-│   └── webhook/route.ts            → Handles Stripe events
-├── buy/
-│   └── page.tsx                    → Order success page
-└── ...
-components/
-├── stripe-checkout-button.tsx      → Payment button component
-├── buy-page.tsx                    → Configurator with Stripe integration
-└── ...
-```
-
-## 10. Troubleshooting
-
-**"Could not load Stripe API"**
-- Check `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is set correctly
-- Restart dev server: `npm run dev`
-
-**"Webhook signature verification failed"**
-- Verify `STRIPE_WEBHOOK_SECRET` is correct
-- Make sure webhook endpoint is publicly accessible (not localhost)
-
-**"Failed to create checkout session"**
-- Check `STRIPE_SECRET_KEY` is set correctly
-- Check API route at `/api/checkout-session` exists
-- Look at server logs for detailed error message
+**Order stays `PENDING` after paying**: the webhook isn't reaching the server (run `stripe listen` locally). Opening the success page also confirms the order.

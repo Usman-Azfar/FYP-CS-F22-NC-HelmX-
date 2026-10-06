@@ -9,7 +9,7 @@
 import * as React from 'react'
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Eye, Navigation, Camera, Mic, Cloud, Zap, CheckCircle } from "lucide-react"
+import { Shield, Eye, Navigation, Camera, Mic, Music, Cloud, Zap, CheckCircle } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 const features = [
@@ -51,12 +51,21 @@ const features = [
   },
   {
     icon: Mic,
-    title: "Voice Control + Entertainment",
+    title: "Voice Assistant",
     description:
-      "Hands-free voice assistant for calls, navigation, and media. Supports both online and offline commands with adaptive noise handling.",
+      "Hands-free voice assistant for calls and navigation. Supports both online and offline commands with adaptive noise handling.",
     color: "from-yellow-500 to-orange-500",
-    features: ["Voice Commands", "Music Control", "Call Handling", "Offline Mode"],
+    features: ["Voice Commands", "Call Handling", "Offline Mode", "Noise Handling"],
     stats: { value: "100%", label: "Hands-Free" },
+  },
+  {
+    icon: Music,
+    title: "Entertainment System",
+    description:
+      "Built-in speakers for music and media playback, controlled by voice so riders can enjoy their ride without taking their hands off the bars.",
+    color: "from-pink-500 to-rose-500",
+    features: ["Music Playback", "Media Control", "Built-in Speakers", "Voice-Controlled"],
+    stats: { value: "2", label: "Speakers" },
   },
   {
     icon: Cloud,
@@ -159,6 +168,10 @@ export function Features() {
                 cardRefs.current[index] = el
               }}
               className={`group relative overflow-hidden border-border/40 bg-card p-6 transition-all duration-500 ${
+                index === features.length - 1 && features.length % 3 === 1 ? "lg:col-start-2" : ""
+              } ${
+                index === features.length - 1 && features.length % 2 === 1 ? "sm:col-span-2 sm:mx-auto sm:w-[calc(50%-0.75rem)] lg:col-span-1 lg:w-auto" : ""
+              } ${
                 visibleCards.includes(index) ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
               } hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2`}
             >

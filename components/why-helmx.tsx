@@ -6,6 +6,7 @@
  */
 "use client"
 
+import Image from "next/image"
 import { CheckCircle2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import SoftAurora from "@/components/soft-aurora"
@@ -36,23 +37,16 @@ export function WhyHelmX() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true)
-          }
-        })
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
       },
       { threshold: 0.2 },
     )
 
     observer.observe(section)
-
-    const fallbackTimer = window.setTimeout(() => {
-      setIsVisible(true)
-    }, 400)
-
     return () => observer.disconnect()
-      , window.clearTimeout(fallbackTimer)
   }, [])
 
   return (
@@ -115,11 +109,13 @@ export function WhyHelmX() {
           <div
             className={`relative z-10 transition-all duration-700 delay-300 ${isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"}`}
           >
-            <div className="aspect-square overflow-hidden rounded-2xl border border-border/40 bg-muted">
-              <img
+            <div className="relative aspect-square overflow-hidden rounded-2xl border border-border/40 bg-muted">
+              <Image
                 src="/futuristic-ai-smart-motorcycle-helmet-with-hud-dis.jpg"
                 alt="HelmX Smart Helmet"
-                className="h-full w-full object-cover"
+                fill
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover"
               />
             </div>
             <div

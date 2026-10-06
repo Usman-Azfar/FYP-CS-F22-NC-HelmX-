@@ -1,98 +1,56 @@
 "use client"
 
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StripeCheckoutButton } from "@/components/stripe-checkout-button"
 import { Card } from "@/components/ui/card"
-import { HelmetScene } from "@/components/helmet-scene"
-import {
-  BatteryCharging,
-  Check,
-  Gauge,
-  Package,
-  Shield,
-  Sparkles,
-  Volume2,
-} from "lucide-react"
+import { ALL_PART_IDS, PARTS, STORAGE_OPTIONS, formatMoney, getStorageOption, type CatalogPart } from "@/lib/catalog"
+import { Check, Gauge, Package, Shield, Sparkles } from "lucide-react"
 
-const baseParts = [
-  { id: "shell", name: "Helmet", price: 11000, description: "Outer shell and mounting frame" },
-  { id: "compute", name: "Raspberry Pi", price: 33500, description: "Main compute board" },
-  { id: "power", name: "Charger", price: 4000, description: "Charging and power handling" },
-  { id: "case", name: "Protective case", price: 1000, description: "Internal case and protection" },
-]
+// three.js + the 10 MB model are only needed on this page and only in the browser,
+// so load them after the configurator UI is interactive.
+const HelmetScene = dynamic(() => import("@/components/helmet-scene").then((mod) => mod.HelmetScene), {
+  ssr: false,
+  loading: () => <SceneSkeleton />,
+})
 
-const sensorParts = [
-  { id: "picam", name: "Pi Camera Module v2", price: 7000, description: "Primary rear camera" },
-  { id: "usbcam", name: "USB Camera Module", price: 4000, description: "Secondary camera module" },
-  { id: "imu", name: "MPU 6050", price: 700, description: "Motion / impact sensing" },
-  { id: "air", name: "MQ 135", price: 500, description: "Air quality sensing" },
-  { id: "temp", name: "DHT 22", price: 600, description: "Temperature and humidity" },
-  { id: "gps", name: "GPS NEO 6M", price: 1800, description: "Navigation and location" },
-  { id: "gsm", name: "GSM SIM 800L", price: 2500, description: "Emergency messaging" },
-]
-
-const interactionParts = [
-  { id: "voice", name: "Voice recognition mic", price: 6500, description: "Hands-free voice commands" },
-  { id: "speakers", name: "2 speakers", price: 1000, description: "Audio output for alerts" },
-  { id: "battery", name: "3 lithium-ion batteries", price: 6000, description: "Standard power pack" },
-]
-
-const optionalUpgrades = [
-  { id: "storage", name: "Expanded storage", price: 1800, description: "Higher storage tier for logs and media" },
-]
-
-const storageOptions = [
-  { id: "storage-32gb", name: "32 GB", price: 900 },
-  { id: "storage-64gb", name: "64 GB", price: 1200 },
-  { id: "storage-128gb", name: "128 GB", price: 1800 },
-  { id: "storage-256gb", name: "256 GB", price: 2400 },
-  { id: "storage-512gb", name: "512 GB", price: 3300 },
-  { id: "storage-1tb", name: "1 TB", price: 4500 },
-]
-
-function formatMoney(amount: number) {
-  return `₨ ${amount.toLocaleString("en-PK")}`
+function SceneSkeleton() {
+  return (
+    <div className="flex h-[480px] items-center justify-center rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.14),rgba(2,6,23,0.98)_58%)] md:h-[580px]">
+      <span className="animate-pulse text-xs uppercase tracking-[0.3em] text-white/50">Loading 3D preview</span>
+    </div>
+  )
 }
+
+const PART_GROUPS: Array<{ id: CatalogPart["group"]; label: string }> = [
+  { id: "core", label: "Core parts" },
+  { id: "sensors", label: "Sensors & connectivity" },
+  { id: "interaction", label: "Audio, voice & power" },
+]
 
 export function BuyPage() {
   const [removedParts, setRemovedParts] = useState<string[]>([])
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([])
-  const [selectedStorage, setSelectedStorage] = useState<string>("")
-  const [email, setEmail] = useState<string>("")
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [selectedStorage, setSelectedStorage] = useState<string | null>(null)
+  const [email, setEmail] = useState("")
 
-  const total = useMemo(() => {
-    const parts = [...baseParts, ...sensorParts, ...interactionParts]
-    const activeParts = parts.filter((part) => !removedParts.includes(part.id))
-    const extrasTotal = optionalUpgrades.reduce((sum, upgrade) => sum + (selectedExtras.includes(upgrade.id) ? upgrade.price : 0), 0)
-    const storagePrice = selectedStorage ? storageOptions.find((s) => s.id === selectedStorage)?.price || 0 : 0
-
-    return activeParts.reduce((sum, item) => sum + item.price, 0) + extrasTotal + storagePrice
-  }, [removedParts, selectedExtras, selectedStorage])
+  const activeParts = useMemo(() => PARTS.filter((part) => !removedParts.includes(part.id)), [removedParts])
+  const storage = getStorageOption(selectedStorage)
+  const total = activeParts.reduce((sum, part) => sum + part.price, 0) + (storage?.price ?? 0)
+  const partIds = useMemo(() => activeParts.map((part) => part.id), [activeParts])
+  const allSelected = removedParts.length === 0
 
   const toggleRemovedPart = (id: string) => {
     setRemovedParts((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
   }
 
-  const toggleExtra = (id: string) => {
-    setSelectedExtras((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
-  }
-
-  const selectAll = () => {
-    setRemovedParts([])
-  }
-
-  const deselectAll = () => {
-    const allPartIds = [...baseParts, ...sensorParts, ...interactionParts].map((part) => part.id)
-    setRemovedParts(allPartIds)
-  }
+  const toggleAll = () => setRemovedParts(allSelected ? [...ALL_PART_IDS] : [])
 
   return (
     <section className="overflow-hidden bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(249,115,22,0.14),transparent_32%),linear-gradient(180deg,#020617_0%,#0b1220_100%)] text-white">
-      <section className="relative pt-24 pb-16 md:pt-28">
+      <div className="relative pt-24 pb-16 md:pt-28">
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:96px_96px] opacity-20" />
         <div className="container mx-auto px-4">
           <div className="mb-8 flex flex-wrap items-center gap-3">
@@ -153,67 +111,77 @@ export function BuyPage() {
 
                 <div className="mt-6 space-y-6">
                   <button
-                    onClick={() => (removedParts.length === 0 ? deselectAll() : selectAll())}
-                    className="flex items-center gap-3 rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left hover:bg-white/8 transition"
+                    type="button"
+                    onClick={toggleAll}
+                    aria-pressed={allSelected}
+                    className="flex items-center gap-3 rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left transition hover:bg-white/10"
                   >
-                    <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${removedParts.length === 0 ? "border-cyan-300 bg-cyan-300 text-slate-950" : "border-white/25 bg-transparent"}`}>
-                      {removedParts.length === 0 && <Check className="h-3.5 w-3.5" />}
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full border ${allSelected ? "border-cyan-300 bg-cyan-300 text-slate-950" : "border-white/25 bg-transparent"}`}
+                    >
+                      {allSelected && <Check className="h-3.5 w-3.5" />}
                     </span>
-                    <span className="text-sm font-medium text-white">Select all parts</span>
+                    <span className="text-sm font-medium text-white">{allSelected ? "Deselect all parts" : "Select all parts"}</span>
                   </button>
-                  <div>
-                    <div className="mb-3 flex items-center justify-between">
-                      <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/45">Base parts</h3>
-                      <span className="text-xs text-white/45">Always included</span>
+
+                  {PART_GROUPS.map((group) => (
+                    <div key={group.id}>
+                      <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-white/45">{group.label}</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {PARTS.filter((part) => part.group === group.id).map((part) => {
+                          const active = !removedParts.includes(part.id)
+                          return (
+                            <button
+                              key={part.id}
+                              type="button"
+                              aria-pressed={active}
+                              title={part.description}
+                              onClick={() => toggleRemovedPart(part.id)}
+                              className={`flex flex-col gap-2 rounded-lg border p-2 text-left text-xs transition-colors duration-300 ${
+                                active
+                                  ? "border-cyan-400/40 bg-cyan-400/10 shadow-[0_0_40px_rgba(34,211,238,0.12)]"
+                                  : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${active ? "border-cyan-300 bg-cyan-300 text-slate-950" : "border-white/25 bg-transparent text-transparent"}`}
+                                >
+                                  <Check className="h-2.5 w-2.5" />
+                                </span>
+                                <span className="text-xs font-medium">{part.name}</span>
+                              </div>
+                              <span className="text-xs text-emerald-300">{formatMoney(part.price)}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
-                    <div className="grid gap-3 grid-cols-2">
-                      {[...baseParts, ...sensorParts, ...interactionParts].map((part) => {
-                        const active = !removedParts.includes(part.id)
-                        return (
-                          <button
-                            key={part.id}
-                            type="button"
-                            onClick={() => toggleRemovedPart(part.id)}
-                            className={`flex flex-col gap-2 rounded-lg border p-2 text-left text-xs transition-all duration-300 ${
-                              active
-                                ? "border-cyan-400/40 bg-cyan-400/10 shadow-[0_0_40px_rgba(34,211,238,0.12)]"
-                                : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className={`flex h-4 w-4 items-center justify-center rounded-full border ${active ? "border-cyan-300 bg-cyan-300 text-slate-950" : "border-white/25 bg-transparent text-transparent"}`}>
-                                <Check className="h-2.5 w-2.5" />
-                              </span>
-                              <span className="text-xs font-medium">{part.name}</span>
-                            </div>
-                            <span className="text-xs text-emerald-300">{formatMoney(part.price)}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                  
+                  ))}
+
                   <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
                     <div className="mb-3 flex items-center gap-2 text-white/80">
                       <Package className="h-4 w-4 text-emerald-300" />
                       <span className="text-sm font-medium">Storage options</span>
+                      <span className="text-xs text-white/45">(optional)</span>
                     </div>
-                    <div className="grid gap-2 grid-cols-2">
-                      {storageOptions.map((storage) => {
-                        const active = selectedStorage === storage.id
+                    <div className="grid grid-cols-2 gap-2">
+                      {STORAGE_OPTIONS.map((option) => {
+                        const active = selectedStorage === option.id
                         return (
                           <button
-                            key={storage.id}
+                            key={option.id}
                             type="button"
-                            onClick={() => setSelectedStorage(active ? "" : storage.id)}
+                            aria-pressed={active}
+                            onClick={() => setSelectedStorage(active ? null : option.id)}
                             className={`rounded-lg border px-2 py-2 text-left text-xs transition ${
                               active
                                 ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-100"
                                 : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:bg-white/[0.05]"
                             }`}
                           >
-                            <span className="block text-xs font-medium leading-tight">{storage.name}</span>
-                            <span className="block text-xs text-emerald-300 mt-1">{formatMoney(storage.price)}</span>
+                            <span className="block text-xs font-medium leading-tight">{option.name}</span>
+                            <span className="mt-1 block text-xs text-emerald-300">{formatMoney(option.price)}</span>
                           </button>
                         )
                       })}
@@ -232,32 +200,25 @@ export function BuyPage() {
                     <p className="text-sm uppercase tracking-[0.25em] text-white/45">Order summary</p>
                     <h3 className="mt-2 text-2xl font-bold">Your build estimate</h3>
                   </div>
-                  <Badge className="border-white/10 bg-white/10 text-white">{removedParts.length} parts hidden</Badge>
+                  <Badge className="border-white/10 bg-white/10 text-white">
+                    {activeParts.length}/{PARTS.length} parts
+                  </Badge>
                 </div>
 
                 <div className="mt-6 space-y-3">
-                  {[...baseParts, ...sensorParts, ...interactionParts]
-                    .filter((part) => !removedParts.includes(part.id))
-                    .map((part) => (
-                      <div key={part.id} className="flex items-center justify-between gap-4 text-sm text-white/75">
-                        <span>{part.name}</span>
-                        <span>{formatMoney(part.price)}</span>
-                      </div>
-                    ))}
-                  {optionalUpgrades
-                    .filter((upgrade) => selectedExtras.includes(upgrade.id))
-                    .map((upgrade) => (
-                      <div key={upgrade.id} className="flex items-center justify-between gap-4 text-sm text-white/75">
-                        <span>{upgrade.name}</span>
-                        <span>{formatMoney(upgrade.price)}</span>
-                      </div>
-                    ))}
-                  {selectedStorage && (
+                  {activeParts.map((part) => (
+                    <div key={part.id} className="flex items-center justify-between gap-4 text-sm text-white/75">
+                      <span>{part.name}</span>
+                      <span>{formatMoney(part.price)}</span>
+                    </div>
+                  ))}
+                  {storage && (
                     <div className="flex items-center justify-between gap-4 text-sm text-white/75">
-                      <span>{storageOptions.find((s) => s.id === selectedStorage)?.name} Storage</span>
-                      <span>{formatMoney(storageOptions.find((s) => s.id === selectedStorage)?.price || 0)}</span>
+                      <span>{storage.name} Storage</span>
+                      <span>{formatMoney(storage.price)}</span>
                     </div>
                   )}
+                  {total === 0 && <p className="text-sm text-white/55">No parts selected yet.</p>}
                   <div className="border-t border-white/10 pt-4">
                     <div className="flex items-center justify-between text-lg font-semibold">
                       <span>Estimated total</span>
@@ -268,8 +229,13 @@ export function BuyPage() {
                 </div>
 
                 <div className="mt-4 space-y-3">
+                  <label htmlFor="checkout-email" className="sr-only">
+                    Email
+                  </label>
                   <input
+                    id="checkout-email"
                     type="email"
+                    autoComplete="email"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -277,13 +243,9 @@ export function BuyPage() {
                   />
                   <StripeCheckoutButton
                     email={email}
-                    cartItems={{
-                      activeParts: [...baseParts, ...sensorParts, ...interactionParts].filter((part) => !removedParts.includes(part.id)),
-                      selectedExtras: optionalUpgrades.filter((upgrade) => selectedExtras.includes(upgrade.id)),
-                      selectedStorage: selectedStorage ? storageOptions.find((s) => s.id === selectedStorage) ?? null : null,
-                    }}
-                    total={total}
-                    isLoading={isLoading}
+                    partIds={partIds}
+                    storageId={selectedStorage}
+                    disabled={total === 0}
                   />
                 </div>
 
@@ -296,7 +258,7 @@ export function BuyPage() {
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </section>
   )
 }

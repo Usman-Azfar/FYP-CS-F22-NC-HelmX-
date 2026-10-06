@@ -67,6 +67,8 @@ const DotField = memo(({
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let running = false;
     let resizeTimer: ReturnType<typeof setTimeout>;
 
     function resize() {
@@ -230,13 +232,24 @@ const DotField = memo(({
 
       ctx!.fill();
 
-      rafRef.current = requestAnimationFrame(tick);
+      if (running && !reduceMotion) rafRef.current = requestAnimationFrame(tick);
     }
 
     doResize();
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', onMouseMove, { passive: true });
-    rafRef.current = requestAnimationFrame(tick);
+
+    // Only animate while visible; with reduced motion tick() draws a single static frame.
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !running) {
+        running = true;
+        rafRef.current = requestAnimationFrame(tick);
+      } else if (!entry.isIntersecting && running) {
+        running = false;
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      }
+    });
+    visibilityObserver.observe(canvas);
 
     rebuildRef.current = () => {
       const { w, h } = sizeRef.current;
@@ -244,13 +257,13 @@ const DotField = memo(({
     };
 
     return () => {
+      visibilityObserver.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       clearInterval(speedInterval);
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -3,20 +3,23 @@
 import { Button } from "@/components/ui/button"
 import { Loader2, CreditCard } from "lucide-react"
 import { useState } from "react"
+import { isValidEmail } from "@/lib/validation"
 
 interface StripeCheckoutButtonProps {
   email: string
-  cartItems: { activeParts: Array<{ id: string; name: string; price: number }>; selectedExtras: Array<{ id: string; name: string; price: number }>; selectedStorage?: { name: string; price: number } | null }
-  total: number
-  isLoading: boolean
+  partIds: string[]
+  storageId: string | null
+  disabled?: boolean
 }
 
-export function StripeCheckoutButton({ email, cartItems, total, isLoading }: StripeCheckoutButtonProps) {
+export function StripeCheckoutButton({ email, partIds, storageId, disabled }: StripeCheckoutButtonProps) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCheckout = async () => {
-    if (!email || !email.includes("@")) {
-      alert("Please enter a valid email address")
+    setError(null)
+    if (!isValidEmail(email.trim())) {
+      setError("Please enter a valid email address.")
       return
     }
 
@@ -24,48 +27,49 @@ export function StripeCheckoutButton({ email, cartItems, total, isLoading }: Str
     try {
       const response = await fetch("/api/checkout-session", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cartItems,
-          total,
-          email,
-        }),
+        headers: { "Content-Type": "application/json" },
+        // Only IDs are sent; the server prices the order from the catalog.
+        body: JSON.stringify({ email: email.trim(), partIds, storageId }),
       })
+      const data = (await response.json().catch(() => ({}))) as { url?: string; error?: string }
 
-      const data = await response.json()
-
-      if (data.url) {
-        window.location.href = data.url
-      } else if (data.error) {
-        alert("Error: " + data.error)
+      if (response.ok && data.url) {
+        window.location.assign(data.url)
+        return // keep the spinner while the browser navigates to Stripe
       }
-    } catch (error) {
-      console.error("Checkout error:", error)
-      alert("Failed to initiate checkout. Please try again.")
-    } finally {
-      setLoading(false)
+      setError(data.error || "Failed to start checkout. Please try again.")
+    } catch (err) {
+      console.error("Checkout error:", err)
+      setError("Failed to start checkout. Please check your connection and try again.")
     }
+    setLoading(false)
   }
 
   return (
-    <Button
-      onClick={handleCheckout}
-      disabled={loading || isLoading || !email}
-      className="group w-full bg-cyan-400 text-slate-950 hover:bg-cyan-300 disabled:opacity-50"
-    >
-      {loading || isLoading ? (
-        <>
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          Processing...
-        </>
-      ) : (
-        <>
-          <CreditCard className="h-4 w-4 mr-2" />
-          Pay with Stripe
-        </>
+    <div className="space-y-2">
+      <Button
+        type="button"
+        onClick={handleCheckout}
+        disabled={loading || disabled || !email}
+        className="group w-full bg-cyan-400 text-slate-950 hover:bg-cyan-300 disabled:opacity-50"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Redirecting to Stripe...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-4 w-4" />
+            Pay with Stripe
+          </>
+        )}
+      </Button>
+      {error && (
+        <p role="alert" className="text-sm text-amber-300">
+          {error}
+        </p>
       )}
-    </Button>
+    </div>
   )
 }

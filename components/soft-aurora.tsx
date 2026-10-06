@@ -196,6 +196,7 @@ export default function SoftAurora({
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
     const renderer = new Renderer({ alpha: true, premultipliedAlpha: false })
     const gl = renderer.gl
@@ -232,29 +233,29 @@ export default function SoftAurora({
     const mesh = new Mesh(gl, { geometry, program })
     container.appendChild(gl.canvas)
 
-    let currentMouse = [0.5, 0.5]
+    const currentMouse = [0.5, 0.5]
     let targetMouse = [0.5, 0.5]
 
+    // Listen on window: the effect sits behind content in a pointer-events-none wrapper,
+    // so the canvas itself never receives mouse events.
     function handleMouseMove(event: MouseEvent) {
       const rect = gl.canvas.getBoundingClientRect()
-      targetMouse = [(event.clientX - rect.left) / rect.width, 1 - (event.clientY - rect.top) / rect.height]
+      const x = (event.clientX - rect.left) / rect.width
+      const y = 1 - (event.clientY - rect.top) / rect.height
+      targetMouse = x >= 0 && x <= 1 && y >= 0 && y <= 1 ? [x, y] : [0.5, 0.5]
     }
 
-    function handleMouseLeave() {
-      targetMouse = [0.5, 0.5]
-    }
-
-    function resize() {
+    const resize = () => {
       renderer.setSize(container.offsetWidth, container.offsetHeight)
       program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height]
+      if (reduceMotion) renderer.render({ scene: mesh })
     }
 
     window.addEventListener("resize", resize)
     resize()
 
-    if (enableMouseInteraction) {
-      gl.canvas.addEventListener("mousemove", handleMouseMove)
-      gl.canvas.addEventListener("mouseleave", handleMouseLeave)
+    if (enableMouseInteraction && !reduceMotion) {
+      window.addEventListener("mousemove", handleMouseMove, { passive: true })
     }
 
     let animationFrameId = 0
@@ -276,16 +277,25 @@ export default function SoftAurora({
       renderer.render({ scene: mesh })
     }
 
-    animationFrameId = window.requestAnimationFrame(update)
+    // Only animate while on screen; with reduced motion a single static frame is drawn by resize().
+    let running = false
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      if (reduceMotion) return
+      if (entry.isIntersecting && !running) {
+        running = true
+        animationFrameId = window.requestAnimationFrame(update)
+      } else if (!entry.isIntersecting && running) {
+        running = false
+        window.cancelAnimationFrame(animationFrameId)
+      }
+    })
+    visibilityObserver.observe(container)
 
     return () => {
+      visibilityObserver.disconnect()
       window.cancelAnimationFrame(animationFrameId)
       window.removeEventListener("resize", resize)
-
-      if (enableMouseInteraction) {
-        gl.canvas.removeEventListener("mousemove", handleMouseMove)
-        gl.canvas.removeEventListener("mouseleave", handleMouseLeave)
-      }
+      window.removeEventListener("mousemove", handleMouseMove)
 
       if (container.contains(gl.canvas)) {
         container.removeChild(gl.canvas)

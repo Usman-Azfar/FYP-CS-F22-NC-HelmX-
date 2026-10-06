@@ -1,54 +1,51 @@
-import nodemailer from "nodemailer"
+import nodemailer, { type Transporter } from "nodemailer"
 
-const SMTP_HOST = process.env.SMTP_HOST
-const SMTP_PORT = Number(process.env.SMTP_PORT || "465")
-const SMTP_SECURE = process.env.SMTP_SECURE !== "false"
-const SMTP_USER = process.env.SMTP_USER
-const SMTP_PASS = process.env.SMTP_PASS
+export const EMAIL_FROM = process.env.EMAIL_FROM || process.env.SMTP_USER || "HelmX <no-reply@helmx.com>"
 
-export const EMAIL_FROM = process.env.EMAIL_FROM || SMTP_USER || "HelmX <no-reply@helmx.com>"
+let transporter: Transporter | null | undefined
 
-const transporter =
-  SMTP_HOST && SMTP_USER && SMTP_PASS
-    ? nodemailer.createTransport({
-        host: SMTP_HOST,
-        port: SMTP_PORT,
-        secure: SMTP_SECURE,
-        auth: {
-          user: SMTP_USER,
-          pass: SMTP_PASS,
-        },
-      })
-    : null
+function getTransporter(): Transporter | null {
+  if (transporter !== undefined) return transporter
 
-if (transporter) {
-  console.log("SMTP transporter configured for host:", SMTP_HOST)
-} else {
-  console.warn("SMTP not configured. Emails will not be sent until SMTP env vars are set.")
+  const { SMTP_HOST, SMTP_USER, SMTP_PASS } = process.env
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.warn("SMTP not configured. Emails will not be sent until SMTP env vars are set.")
+    transporter = null
+    return transporter
+  }
+
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || "465"),
+    secure: process.env.SMTP_SECURE !== "false",
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  })
+  return transporter
 }
 
-export async function sendSmtpEmail(options: {
-  to: string
-  subject: string
-  html: string
-  replyTo?: string
-}) {
-  if (!transporter) {
+/** Escapes user-controlled text before it is interpolated into an HTML email. */
+export function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+export async function sendSmtpEmail(options: { to: string; subject: string; html: string; replyTo?: string }) {
+  const smtp = getTransporter()
+  if (!smtp) {
     throw new Error("SMTP is not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS.")
   }
 
-  try {
-    const info = await transporter.sendMail({
-      from: EMAIL_FROM,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      replyTo: options.replyTo,
-    })
-    console.log(`Email sent to ${options.to}: ${info.messageId || JSON.stringify(info)}`)
-    return info
-  } catch (err) {
-    console.error("sendSmtpEmail error:", err)
-    throw err
-  }
+  const info = await smtp.sendMail({
+    from: EMAIL_FROM,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    replyTo: options.replyTo,
+  })
+  console.log(`Email sent to ${options.to}: ${info.messageId}`)
+  return info
 }

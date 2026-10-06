@@ -4,10 +4,8 @@
  *          Implements interactive link hover effects with underline animations.
  * Author: Hamza Ahmad
  */
-"use client"
-
+import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
 
 const productLinks = [
   { label: "Features", href: "/#features" },
@@ -16,14 +14,21 @@ const productLinks = [
 ]
 
 const aboutLinks = [
-  { label: "Why HelmX", href: "/#about" },
-  { label: "Team", href: "/#about" },
-  { label: "Contact", href: "/#download" },
+  { label: "Why HelmX", href: "/#why-helmx" },
+  { label: "Buy HelmX", href: "/buy" },
+  { label: "Contact", href: "/contact" },
 ]
 
-export function Footer() {
-  const [hoveredLink, setHoveredLink] = useState<string | null>(null)
+function FooterLink({ label, href }: { label: string; href: string }) {
+  return (
+    <Link href={href} className="group relative inline-block transition-all duration-300 hover:translate-x-1 hover:text-primary">
+      {label}
+      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
+    </Link>
+  )
+}
 
+export function Footer() {
   return (
     <footer className="border-t border-border/40 bg-card py-12">
       <div className="container mx-auto px-4">
@@ -31,9 +36,11 @@ export function Footer() {
           <div className="md:col-span-2">
             <div className="mb-4 flex items-center gap-2 transition-transform hover:scale-105">
               <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary to-accent shadow-lg">
-                <img
+                <Image
                   src="/futuristic-motorcycle-helmet-icon-minimal.jpg"
                   alt="HelmX Logo"
+                  width={36}
+                  height={36}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -45,7 +52,7 @@ export function Footer() {
               AI-powered smart helmet designed to make riding safer, smarter, and more connected. A collaboration of BS
               CS students from the University of the Punjab.
             </p>
-            <p className="text-sm text-muted-foreground">© 2025 HelmX. The future of safe riding starts now.</p>
+            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} HelmX. The future of safe riding starts now.</p>
           </div>
 
           <div>
@@ -53,21 +60,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {productLinks.map(({ label, href }) => (
                 <li key={label}>
-                  <Link
-                    href={href}
-                    onMouseEnter={() => setHoveredLink(label)}
-                    onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative inline-block transition-all duration-300 hover:text-primary hover:translate-x-1 ${
-                      hoveredLink === label ? "text-primary translate-x-1" : ""
-                    }`}
-                  >
-                    {label}
-                    <span
-                      className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                        hoveredLink === label ? "w-full" : "w-0"
-                      }`}
-                    />
-                  </Link>
+                  <FooterLink label={label} href={href} />
                 </li>
               ))}
             </ul>
@@ -78,21 +71,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {aboutLinks.map(({ label, href }) => (
                 <li key={label}>
-                  <Link
-                    href={href}
-                    onMouseEnter={() => setHoveredLink(label)}
-                    onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative inline-block transition-all duration-300 hover:text-primary hover:translate-x-1 ${
-                      hoveredLink === label ? "text-primary translate-x-1" : ""
-                    }`}
-                  >
-                    {label}
-                    <span
-                      className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                        hoveredLink === label ? "w-full" : "w-0"
-                      }`}
-                    />
-                  </Link>
+                  <FooterLink label={label} href={href} />
                 </li>
               ))}
             </ul>
